@@ -31,6 +31,6 @@ const run = (cmd) => execSync(cmd, { cwd: root, stdio: "inherit" });
 
 run(`git add package.json`);
 run(`git commit -m "chore: release v${version}"`);
-run(`git push`);
+run(`git push -u origin HEAD`);
 
 console.log(`\nPushed release commit — GitHub Actions will publish v${version} to npm.`);
