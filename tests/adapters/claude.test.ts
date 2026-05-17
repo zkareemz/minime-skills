@@ -83,13 +83,34 @@ describe("ClaudeAdapter", () => {
     expect(content).toContain("@.claude/skills/test-skill/SKILL.md");
   });
 
-  it("uses nested directories for namespaced skill names", async () => {
+  it("uses a flat hyphenated directory for namespaced skill names", async () => {
     await adapter.install([NAMESPACED_SKILL], tmpDir);
     const flat = path.join(tmpDir, ".claude", "skills", "ns-test-skill", "SKILL.md");
     const nested = path.join(tmpDir, ".claude", "skills", "ns", "test-skill", "SKILL.md");
-    expect(await fs.pathExists(flat)).toBe(false);
-    expect(await fs.pathExists(nested)).toBe(true);
+    expect(await fs.pathExists(flat)).toBe(true);
+    expect(await fs.pathExists(nested)).toBe(false);
     const claudeMd = await fs.readFile(path.join(tmpDir, "CLAUDE.md"), "utf8");
-    expect(claudeMd).toContain("@.claude/skills/ns/test-skill/SKILL.md");
+    expect(claudeMd).toContain("@.claude/skills/ns-test-skill/SKILL.md");
+  });
+
+  describe("global install", () => {
+    it("places skill file at skills/<name>/SKILL.md inside the global target dir", async () => {
+      // Simulate ~/.claude as tmpDir
+      await adapter.install([MOCK_SKILL], tmpDir, "global");
+      const destFile = path.join(tmpDir, "skills", "test-skill", "SKILL.md");
+      expect(await fs.pathExists(destFile)).toBe(true);
+      // Should NOT write to the wrong nested path
+      const wrongFile = path.join(tmpDir, ".claude", "skills", "test-skill", "SKILL.md");
+      expect(await fs.pathExists(wrongFile)).toBe(false);
+    });
+
+    it("adds @skills/<name>/SKILL.md import to CLAUDE.md for global install", async () => {
+      await adapter.install([MOCK_SKILL], tmpDir, "global");
+      const claudeMd = path.join(tmpDir, "CLAUDE.md");
+      expect(await fs.pathExists(claudeMd)).toBe(true);
+      const content = await fs.readFile(claudeMd, "utf8");
+      expect(content).toContain("@skills/test-skill/SKILL.md");
+      expect(content).not.toContain("@.claude/skills/test-skill/SKILL.md");
+    });
   });
 });

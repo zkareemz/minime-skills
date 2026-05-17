@@ -35,12 +35,12 @@ describe("GeminiAdapter", () => {
     expect(await fs.pathExists(destFile)).toBe(true);
   });
 
-  it("uses nested directories for namespaced skill names", async () => {
+  it("uses a flat hyphenated directory for namespaced skill names", async () => {
     await adapter.install([NAMESPACED_SKILL], tmpDir);
     const flat = path.join(tmpDir, ".gemini", "skills", "ns-test-skill", "SKILL.md");
     const nested = path.join(tmpDir, ".gemini", "skills", "ns", "test-skill", "SKILL.md");
-    expect(await fs.pathExists(flat)).toBe(false);
-    expect(await fs.pathExists(nested)).toBe(true);
+    expect(await fs.pathExists(flat)).toBe(true);
+    expect(await fs.pathExists(nested)).toBe(false);
   });
 
   it("writes frontmatter + content to the skill file", async () => {

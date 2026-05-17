@@ -23,6 +23,8 @@ const config: AgentConfig = {
   storage: {
     type: "folder",
     baseDir: ".claude/skills",
+    globalBaseDir: "skills",
+    namespaceSeparator: "-",
     entryFile: "SKILL.md",
   },
 

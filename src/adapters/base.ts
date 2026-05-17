@@ -1,5 +1,4 @@
 import path from "path";
-import os from "os";
 import fs from "fs-extra";
 import type {
   Adapter,
@@ -24,6 +23,8 @@ export interface AgentConfig {
   storage: {
     type: "folder" | "file" | "embedded";
     baseDir?: string; // e.g. ".claude/skills" (relative to project root)
+    globalBaseDir?: string; // override baseDir for global scope (relative to getGlobalTargetDir)
+    namespaceSeparator?: string; // folder type only: "/" (nested, default) or "-" (flat)
     extension?: string; // e.g. ".mdc"
     entryFile?: string; // e.g. "SKILL.md"
     targetFile?: string; // e.g. "AGENTS.md" (embedded only)
@@ -137,11 +138,7 @@ export class BaseAdapter implements Adapter {
       const newContent = this.config.format(skill);
       const exists = await fs.pathExists(destFile);
 
-      const relBase =
-        isGlobal && this.config.getGlobalTargetDir(os.homedir())
-          ? this.config.getGlobalTargetDir(os.homedir())!
-          : targetDir;
-      const relPath = path.relative(relBase, destFile);
+      const relPath = path.relative(targetDir, destFile);
 
       let action: "created" | "updated" | "skipped" = "created";
 
@@ -158,10 +155,25 @@ export class BaseAdapter implements Adapter {
         action = "created";
       }
 
+      // Copy additional files (references/, assets/, etc.) from source skill directory
+      if (type === "folder") {
+        const sourceSkillDir = path.dirname(skill.sourcePath);
+        if (await fs.pathExists(sourceSkillDir)) {
+          const sourceEntries = await fs.readdir(sourceSkillDir, { withFileTypes: true });
+          for (const entry of sourceEntries) {
+            if (entry.name === this.config.storage.entryFile) continue;
+            await fs.copy(
+              path.join(sourceSkillDir, entry.name),
+              path.join(path.dirname(destFile), entry.name),
+              { overwrite: true },
+            );
+          }
+        }
+      }
+
       results.push({ skill: skill.meta.name, path: relPath, action });
 
       if (this.config.imports && importFilePath) {
-        const skillImportPath = path.relative(skillsBase, destFile);
         const importLine = this.config.imports.format(skillPath, isGlobal);
         await this.upsertImport(importFilePath, importLine);
       }
@@ -193,10 +205,6 @@ export class BaseAdapter implements Adapter {
     const importFilePath = this.config.imports
       ? path.join(targetDir, this.config.imports.file)
       : null;
-    const relBase =
-      isGlobal && this.config.getGlobalTargetDir(os.homedir())
-        ? this.config.getGlobalTargetDir(os.homedir())!
-        : targetDir;
 
     if (type === "file") {
       if (!(await fs.pathExists(skillsBase))) return [];
@@ -209,7 +217,7 @@ export class BaseAdapter implements Adapter {
         if (this.config.marker && content.includes(this.config.marker)) {
           results.push({
             skill: file.replace(this.config.storage.extension!, ""),
-            path: path.relative(relBase, filePath),
+            path: path.relative(targetDir, filePath),
             action: "removed",
           });
           if (!dryRun) await fs.remove(filePath);
@@ -225,7 +233,7 @@ export class BaseAdapter implements Adapter {
       const skillPath = path.relative(skillsBase, dir);
       results.push({
         skill: name,
-        path: path.relative(relBase, skillFile),
+        path: path.relative(targetDir, skillFile),
         action: "removed",
       });
 
@@ -251,18 +259,15 @@ export class BaseAdapter implements Adapter {
   }
 
   private skillsBase(targetDir: string, scope: InstallScope): string {
-    const { baseDir } = this.config.storage;
-    if (scope === "global") {
-      const globalBase = this.config.getGlobalTargetDir(os.homedir());
-      // For agents like Cursor that use home dir as targetDir, baseDir might already be absolute or relative to home
-      return path.join(globalBase!, baseDir!);
-    }
-    return path.join(targetDir, baseDir!);
+    const { baseDir, globalBaseDir } = this.config.storage;
+    const effectiveBase = scope === "global" ? (globalBaseDir ?? baseDir!) : baseDir!;
+    return path.join(targetDir, effectiveBase);
   }
 
   private nameToPath(name: string): string {
     if (this.config.storage.type === "folder") {
-      return name.replace(":", "/");
+      const sep = this.config.storage.namespaceSeparator ?? "/";
+      return name.replace(":", sep);
     }
     return name.replace(":", "-");
   }

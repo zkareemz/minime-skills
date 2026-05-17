@@ -19,12 +19,15 @@ const config: AgentConfig = {
   storage: {
     type: "folder",
     baseDir: ".gemini/skills",
+    globalBaseDir: "skills",
+    namespaceSeparator: "-",
     entryFile: "SKILL.md",
   },
 
   format: (skill: Skill) => {
     const { name, description, version } = skill.meta;
-    const lines = ["---", `name: ${name}`, `description: ${description}`];
+    const sanitizedName = name.replace(":", "-");
+    const lines = ["---", `name: ${sanitizedName}`, `description: ${description}`];
     if (version) lines.push(`version: ${version}`);
     lines.push("---", "", skill.content, "");
     return lines.join("\n");
