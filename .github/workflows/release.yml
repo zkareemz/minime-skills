@@ -12,7 +12,7 @@ jobs:
   publish:
     name: Publish to npm
     runs-on: ubuntu-latest
-    if: startsWith(github.event.head_commit.message, 'chore: release v')
+    if: "startsWith(github.event.head_commit.message, 'chore: release v')"
     steps:
       - uses: actions/checkout@v4
 
