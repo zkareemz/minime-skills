@@ -85,8 +85,21 @@ describe("ClaudeAdapter", () => {
 
   it("uses a flat hyphenated directory for namespaced skill names", async () => {
     await adapter.install([NAMESPACED_SKILL], tmpDir);
-    const flat = path.join(tmpDir, ".claude", "skills", "ns-test-skill", "SKILL.md");
-    const nested = path.join(tmpDir, ".claude", "skills", "ns", "test-skill", "SKILL.md");
+    const flat = path.join(
+      tmpDir,
+      ".claude",
+      "skills",
+      "ns-test-skill",
+      "SKILL.md",
+    );
+    const nested = path.join(
+      tmpDir,
+      ".claude",
+      "skills",
+      "ns",
+      "test-skill",
+      "SKILL.md",
+    );
     expect(await fs.pathExists(flat)).toBe(true);
     expect(await fs.pathExists(nested)).toBe(false);
     const claudeMd = await fs.readFile(path.join(tmpDir, "CLAUDE.md"), "utf8");
@@ -100,7 +113,13 @@ describe("ClaudeAdapter", () => {
       const destFile = path.join(tmpDir, "skills", "test-skill", "SKILL.md");
       expect(await fs.pathExists(destFile)).toBe(true);
       // Should NOT write to the wrong nested path
-      const wrongFile = path.join(tmpDir, ".claude", "skills", "test-skill", "SKILL.md");
+      const wrongFile = path.join(
+        tmpDir,
+        ".claude",
+        "skills",
+        "test-skill",
+        "SKILL.md",
+      );
       expect(await fs.pathExists(wrongFile)).toBe(false);
     });
 

@@ -83,7 +83,10 @@ export class BaseAdapter implements Adapter {
       if (!(await fs.pathExists(dir))) return false;
       const files = await fs.readdir(dir);
       for (const file of files) {
-        if (this.config.storage.extension && !file.endsWith(this.config.storage.extension))
+        if (
+          this.config.storage.extension &&
+          !file.endsWith(this.config.storage.extension)
+        )
           continue;
         const content = await fs.readFile(path.join(dir, file), "utf8");
         if (this.config.marker && content.includes(this.config.marker))
@@ -130,7 +133,10 @@ export class BaseAdapter implements Adapter {
       const skillPath = this.nameToPath(skill.meta.name);
       const destFile =
         type === "file"
-          ? path.join(skillsBase, `${skillPath}${this.config.storage.extension}`)
+          ? path.join(
+              skillsBase,
+              `${skillPath}${this.config.storage.extension}`,
+            )
           : path.join(skillsBase, skillPath, this.config.storage.entryFile!);
 
       await fs.ensureDir(path.dirname(destFile));
@@ -159,7 +165,9 @@ export class BaseAdapter implements Adapter {
       if (type === "folder") {
         const sourceSkillDir = path.dirname(skill.sourcePath);
         if (await fs.pathExists(sourceSkillDir)) {
-          const sourceEntries = await fs.readdir(sourceSkillDir, { withFileTypes: true });
+          const sourceEntries = await fs.readdir(sourceSkillDir, {
+            withFileTypes: true,
+          });
           for (const entry of sourceEntries) {
             if (entry.name === this.config.storage.entryFile) continue;
             await fs.copy(
@@ -210,7 +218,10 @@ export class BaseAdapter implements Adapter {
       if (!(await fs.pathExists(skillsBase))) return [];
       const files = await fs.readdir(skillsBase);
       for (const file of files) {
-        if (this.config.storage.extension && !file.endsWith(this.config.storage.extension))
+        if (
+          this.config.storage.extension &&
+          !file.endsWith(this.config.storage.extension)
+        )
           continue;
         const filePath = path.join(skillsBase, file);
         const content = await fs.readFile(filePath, "utf8");
@@ -260,7 +271,8 @@ export class BaseAdapter implements Adapter {
 
   private skillsBase(targetDir: string, scope: InstallScope): string {
     const { baseDir, globalBaseDir } = this.config.storage;
-    const effectiveBase = scope === "global" ? (globalBaseDir ?? baseDir!) : baseDir!;
+    const effectiveBase =
+      scope === "global" ? (globalBaseDir ?? baseDir!) : baseDir!;
     return path.join(targetDir, effectiveBase);
   }
 

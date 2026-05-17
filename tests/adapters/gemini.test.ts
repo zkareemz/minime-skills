@@ -31,14 +31,33 @@ describe("GeminiAdapter", () => {
 
   it("creates the skill file at a flat path .gemini/skills/<name>/SKILL.md", async () => {
     await adapter.install([MOCK_SKILL], tmpDir);
-    const destFile = path.join(tmpDir, ".gemini", "skills", "test-skill", "SKILL.md");
+    const destFile = path.join(
+      tmpDir,
+      ".gemini",
+      "skills",
+      "test-skill",
+      "SKILL.md",
+    );
     expect(await fs.pathExists(destFile)).toBe(true);
   });
 
   it("uses a flat hyphenated directory for namespaced skill names", async () => {
     await adapter.install([NAMESPACED_SKILL], tmpDir);
-    const flat = path.join(tmpDir, ".gemini", "skills", "ns-test-skill", "SKILL.md");
-    const nested = path.join(tmpDir, ".gemini", "skills", "ns", "test-skill", "SKILL.md");
+    const flat = path.join(
+      tmpDir,
+      ".gemini",
+      "skills",
+      "ns-test-skill",
+      "SKILL.md",
+    );
+    const nested = path.join(
+      tmpDir,
+      ".gemini",
+      "skills",
+      "ns",
+      "test-skill",
+      "SKILL.md",
+    );
     expect(await fs.pathExists(flat)).toBe(true);
     expect(await fs.pathExists(nested)).toBe(false);
   });
@@ -98,7 +117,9 @@ describe("GeminiAdapter.uninstall", () => {
   const adapter = new GeminiAdapter();
 
   beforeEach(async () => {
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "minime-gemini-uninstall-"));
+    tmpDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), "minime-gemini-uninstall-"),
+    );
     await adapter.install([MOCK_SKILL], tmpDir, "project");
   });
 
@@ -146,7 +167,9 @@ describe("GeminiAdapter.uninstall", () => {
   });
 
   it("returns empty when nothing is installed", async () => {
-    const empty = await fs.mkdtemp(path.join(os.tmpdir(), "minime-gemini-empty-"));
+    const empty = await fs.mkdtemp(
+      path.join(os.tmpdir(), "minime-gemini-empty-"),
+    );
     try {
       const results = await adapter.uninstall(empty, "project");
       expect(results).toHaveLength(0);

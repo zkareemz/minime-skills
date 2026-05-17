@@ -9,7 +9,8 @@ const config: AgentConfig = {
   displayName: "Gemini CLI",
   supportsGlobal: true,
 
-  detectInProject: async (projectDir) => anyExists(path.join(projectDir, ".gemini")),
+  detectInProject: async (projectDir) =>
+    anyExists(path.join(projectDir, ".gemini")),
 
   detectOnSystem: async () =>
     commandExists("gemini") || anyExists(path.join(os.homedir(), ".gemini")),
@@ -27,7 +28,11 @@ const config: AgentConfig = {
   format: (skill: Skill) => {
     const { name, description, version } = skill.meta;
     const sanitizedName = name.replace(":", "-");
-    const lines = ["---", `name: ${sanitizedName}`, `description: ${description}`];
+    const lines = [
+      "---",
+      `name: ${sanitizedName}`,
+      `description: ${description}`,
+    ];
     if (version) lines.push(`version: ${version}`);
     lines.push("---", "", skill.content, "");
     return lines.join("\n");

@@ -11,7 +11,8 @@ const config: AgentConfig = {
   displayName: "Windsurf",
   supportsGlobal: true,
 
-  detectInProject: async (projectDir) => anyExists(path.join(projectDir, ".windsurf")),
+  detectInProject: async (projectDir) =>
+    anyExists(path.join(projectDir, ".windsurf")),
 
   detectOnSystem: async () =>
     commandExists("windsurf") ||

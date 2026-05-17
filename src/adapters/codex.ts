@@ -9,7 +9,8 @@ const config: AgentConfig = {
   displayName: "OpenAI Codex",
   supportsGlobal: true,
 
-  detectInProject: async (projectDir) => anyExists(path.join(projectDir, "AGENTS.md")),
+  detectInProject: async (projectDir) =>
+    anyExists(path.join(projectDir, "AGENTS.md")),
 
   detectOnSystem: async () =>
     commandExists("codex") ||

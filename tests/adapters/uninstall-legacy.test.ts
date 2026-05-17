@@ -9,7 +9,9 @@ describe("ClaudeAdapter - Legacy Uninstall", () => {
   const adapter = new ClaudeAdapter();
 
   beforeEach(async () => {
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "minime-legacy-uninstall-"));
+    tmpDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), "minime-legacy-uninstall-"),
+    );
   });
 
   afterEach(async () => {
@@ -21,10 +23,18 @@ describe("ClaudeAdapter - Legacy Uninstall", () => {
     const legacyDir = path.join(tmpDir, ".claude", "skills", "minime-idea");
     const legacyFile = path.join(legacyDir, "SKILL.md");
     await fs.ensureDir(legacyDir);
-    await fs.writeFile(legacyFile, "---\nname: minime:idea\n---\n# Idea", "utf8");
+    await fs.writeFile(
+      legacyFile,
+      "---\nname: minime:idea\n---\n# Idea",
+      "utf8",
+    );
 
     const claudeMd = path.join(tmpDir, "CLAUDE.md");
-    await fs.writeFile(claudeMd, "@.claude/skills/minime-idea/SKILL.md\n", "utf8");
+    await fs.writeFile(
+      claudeMd,
+      "@.claude/skills/minime-idea/SKILL.md\n",
+      "utf8",
+    );
 
     // Verify setup
     expect(await fs.pathExists(legacyFile)).toBe(true);
@@ -33,7 +43,7 @@ describe("ClaudeAdapter - Legacy Uninstall", () => {
     const results = await adapter.uninstall(tmpDir, "project");
 
     // Verify removal
-    expect(results.some(r => r.skill === "minime-idea")).toBe(true);
+    expect(results.some((r) => r.skill === "minime-idea")).toBe(true);
     expect(await fs.pathExists(legacyDir)).toBe(false);
     expect(await fs.pathExists(claudeMd)).toBe(false); // File should be removed if empty
   });
@@ -42,15 +52,27 @@ describe("ClaudeAdapter - Legacy Uninstall", () => {
     // Setup legacy
     const legacyDir = path.join(tmpDir, ".claude", "skills", "minime-old");
     await fs.ensureDir(legacyDir);
-    await fs.writeFile(path.join(legacyDir, "SKILL.md"), "---\nname: minime:old\n---\n# Old", "utf8");
+    await fs.writeFile(
+      path.join(legacyDir, "SKILL.md"),
+      "---\nname: minime:old\n---\n# Old",
+      "utf8",
+    );
 
     // Setup new hierarchical
     const newDir = path.join(tmpDir, ".claude", "skills", "minime", "new");
     await fs.ensureDir(newDir);
-    await fs.writeFile(path.join(newDir, "SKILL.md"), "---\nname: minime:new\n---\n# New", "utf8");
+    await fs.writeFile(
+      path.join(newDir, "SKILL.md"),
+      "---\nname: minime:new\n---\n# New",
+      "utf8",
+    );
 
     const claudeMd = path.join(tmpDir, "CLAUDE.md");
-    await fs.writeFile(claudeMd, "@.claude/skills/minime-old/SKILL.md\n@.claude/skills/minime/new/SKILL.md\n", "utf8");
+    await fs.writeFile(
+      claudeMd,
+      "@.claude/skills/minime-old/SKILL.md\n@.claude/skills/minime/new/SKILL.md\n",
+      "utf8",
+    );
 
     // Uninstall
     await adapter.uninstall(tmpDir, "project");
