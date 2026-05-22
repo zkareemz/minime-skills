@@ -207,16 +207,16 @@ describe("WindsurfAdapter.uninstall", () => {
     expect(results[0].action).toBe("removed");
     expect(
       await fs.pathExists(
-        path.join(tmpDir, ".windsurf", "rules", "test-skill.md"),
+        path.join(tmpDir, ".windsurf", "skills", "test-skill", "SKILL.md"),
       ),
     ).toBe(true);
   });
 
-  it("removes the .md file", async () => {
+  it("removes the skill file", async () => {
     await adapter.uninstall(tmpDir, "project");
     expect(
       await fs.pathExists(
-        path.join(tmpDir, ".windsurf", "rules", "test-skill.md"),
+        path.join(tmpDir, ".windsurf", "skills", "test-skill", "SKILL.md"),
       ),
     ).toBe(false);
   });
@@ -226,11 +226,18 @@ describe("WindsurfAdapter.uninstall", () => {
     expect(await adapter.hasInstalledSkills(tmpDir, "project")).toBe(false);
   });
 
-  it("does not remove .md files that were not created by minime", async () => {
-    const userRule = path.join(tmpDir, ".windsurf", "rules", "my-own-rule.md");
+  it("does not remove skill folders without a SKILL.md entrypoint", async () => {
+    const userRule = path.join(
+      tmpDir,
+      ".windsurf",
+      "skills",
+      "my-own-rule",
+      "README.md",
+    );
+    await fs.ensureDir(path.dirname(userRule));
     await fs.writeFile(
       userRule,
-      "# My own Windsurf rule\n\nDo something custom.\n",
+      "# My own Windsurf content\n\nDo something custom.\n",
     );
     await adapter.uninstall(tmpDir, "project");
     expect(await fs.pathExists(userRule)).toBe(true);

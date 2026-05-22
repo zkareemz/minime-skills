@@ -29,6 +29,11 @@ describe("CursorAdapter", () => {
     expect(await fs.pathExists(destFile)).toBe(true);
   });
 
+  it("does not advertise unsupported global project rules", () => {
+    expect(adapter.supportsGlobal).toBe(false);
+    expect(adapter.getGlobalTargetDir("/home/example")).toBeNull();
+  });
+
   it("writes valid Cursor MDC frontmatter with minime marker", async () => {
     await adapter.install([MOCK_SKILL], tmpDir);
     const content = await fs.readFile(

@@ -57,30 +57,16 @@ describe("ClaudeAdapter", () => {
     expect(results[0].action).toBe("skipped");
   });
 
-  it("adds an @import line to CLAUDE.md", async () => {
+  it("does not create CLAUDE.md imports because Claude discovers skills natively", async () => {
     await adapter.install([MOCK_SKILL], tmpDir);
-    const claudeMd = path.join(tmpDir, "CLAUDE.md");
-    expect(await fs.pathExists(claudeMd)).toBe(true);
-    const content = await fs.readFile(claudeMd, "utf8");
-    expect(content).toContain("@.claude/skills/test-skill/SKILL.md");
+    expect(await fs.pathExists(path.join(tmpDir, "CLAUDE.md"))).toBe(false);
   });
 
-  it("does not duplicate the @import line in CLAUDE.md", async () => {
-    await adapter.install([MOCK_SKILL], tmpDir);
-    await adapter.install([MOCK_SKILL], tmpDir);
-    const claudeMd = await fs.readFile(path.join(tmpDir, "CLAUDE.md"), "utf8");
-    const count = (
-      claudeMd.match(/@\.claude\/skills\/test-skill\/SKILL\.md/g) ?? []
-    ).length;
-    expect(count).toBe(1);
-  });
-
-  it("appends to an existing CLAUDE.md without removing existing content", async () => {
+  it("leaves an existing CLAUDE.md untouched", async () => {
     await fs.writeFile(path.join(tmpDir, "CLAUDE.md"), "# Existing content\n");
     await adapter.install([MOCK_SKILL], tmpDir);
     const content = await fs.readFile(path.join(tmpDir, "CLAUDE.md"), "utf8");
-    expect(content).toContain("# Existing content");
-    expect(content).toContain("@.claude/skills/test-skill/SKILL.md");
+    expect(content).toBe("# Existing content\n");
   });
 
   it("uses a flat hyphenated directory for namespaced skill names", async () => {
@@ -102,8 +88,6 @@ describe("ClaudeAdapter", () => {
     );
     expect(await fs.pathExists(flat)).toBe(true);
     expect(await fs.pathExists(nested)).toBe(false);
-    const claudeMd = await fs.readFile(path.join(tmpDir, "CLAUDE.md"), "utf8");
-    expect(claudeMd).toContain("@.claude/skills/ns-test-skill/SKILL.md");
   });
 
   describe("global install", () => {
@@ -123,13 +107,9 @@ describe("ClaudeAdapter", () => {
       expect(await fs.pathExists(wrongFile)).toBe(false);
     });
 
-    it("adds @skills/<name>/SKILL.md import to CLAUDE.md for global install", async () => {
+    it("does not create CLAUDE.md imports for global install", async () => {
       await adapter.install([MOCK_SKILL], tmpDir, "global");
-      const claudeMd = path.join(tmpDir, "CLAUDE.md");
-      expect(await fs.pathExists(claudeMd)).toBe(true);
-      const content = await fs.readFile(claudeMd, "utf8");
-      expect(content).toContain("@skills/test-skill/SKILL.md");
-      expect(content).not.toContain("@.claude/skills/test-skill/SKILL.md");
+      expect(await fs.pathExists(path.join(tmpDir, "CLAUDE.md"))).toBe(false);
     });
   });
 });

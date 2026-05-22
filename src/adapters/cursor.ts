@@ -9,7 +9,7 @@ const MINIME_MARKER = "minime: true";
 const config: AgentConfig = {
   agentName: "cursor",
   displayName: "Cursor",
-  supportsGlobal: true,
+  supportsGlobal: false,
 
   detectInProject: async (projectDir) =>
     anyExists(
@@ -32,7 +32,7 @@ const config: AgentConfig = {
       path.join(os.homedir(), ".cursor"),
     ),
 
-  getGlobalTargetDir: (homeDir) => homeDir,
+  getGlobalTargetDir: () => null,
 
   storage: {
     type: "file",

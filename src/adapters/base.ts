@@ -37,6 +37,7 @@ export interface AgentConfig {
   imports?: {
     file: string; // e.g. "CLAUDE.md"
     format: (skillPath: string, isGlobal: boolean) => string;
+    install?: boolean;
   };
 
   /** Unique marker to identify minime-managed files (non-folder types) */
@@ -181,8 +182,9 @@ export class BaseAdapter implements Adapter {
 
       results.push({ skill: skill.meta.name, path: relPath, action });
 
-      if (this.config.imports && importFilePath) {
-        const importLine = this.config.imports.format(skillPath, isGlobal);
+      const imports = this.config.imports;
+      if (imports && imports.install !== false && importFilePath) {
+        const importLine = imports.format(skillPath, isGlobal);
         await this.upsertImport(importFilePath, importLine);
       }
     }

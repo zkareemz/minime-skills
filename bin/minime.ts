@@ -75,7 +75,9 @@ async function detectAgents(
     const detected =
       mode === "installed"
         ? await adapter.hasInstalledSkills(targetDir, scope)
-        : await adapter.detectOnSystem();
+        : scope === "project"
+          ? await adapter.detectInProject(targetDir)
+          : await adapter.detectOnSystem();
 
     if (detected) found.push(adapter);
   }

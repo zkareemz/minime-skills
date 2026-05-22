@@ -40,6 +40,7 @@ const config: AgentConfig = {
 
   imports: {
     file: "GEMINI.md",
+    install: false,
     format: (skillPath, isGlobal) =>
       isGlobal
         ? `@skills/${skillPath}/SKILL.md`

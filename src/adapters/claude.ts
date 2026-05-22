@@ -38,6 +38,7 @@ const config: AgentConfig = {
 
   imports: {
     file: "CLAUDE.md",
+    install: false,
     format: (skillPath, isGlobal) =>
       isGlobal
         ? `@skills/${skillPath}/SKILL.md`

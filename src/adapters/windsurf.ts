@@ -4,15 +4,17 @@ import { commandExists, anyExists } from "../detect";
 import { BaseAdapter, type AgentConfig } from "./base";
 import type { Skill } from "../types";
 
-const MINIME_MARKER = "<!-- minime-managed -->";
-
 const config: AgentConfig = {
   agentName: "windsurf",
   displayName: "Windsurf",
   supportsGlobal: true,
 
   detectInProject: async (projectDir) =>
-    anyExists(path.join(projectDir, ".windsurf")),
+    anyExists(
+      path.join(projectDir, ".windsurf", "skills"),
+      path.join(projectDir, ".agents", "skills"),
+      path.join(projectDir, ".windsurf", "rules"),
+    ),
 
   detectOnSystem: async () =>
     commandExists("windsurf") ||
@@ -29,19 +31,28 @@ const config: AgentConfig = {
       path.join(os.homedir(), ".codeium"),
     ),
 
-  getGlobalTargetDir: (homeDir) => homeDir,
+  getGlobalTargetDir: (homeDir) => path.join(homeDir, ".codeium", "windsurf"),
 
   storage: {
-    type: "file",
-    baseDir: ".windsurf/rules",
-    extension: ".md",
+    type: "folder",
+    baseDir: ".windsurf/skills",
+    globalBaseDir: "skills",
+    namespaceSeparator: "-",
+    entryFile: "SKILL.md",
   },
 
   format: (skill: Skill) => {
-    return `${MINIME_MARKER}\n\n${skill.content}\n`;
+    const { name, description, version } = skill.meta;
+    const sanitizedName = name.replace(":", "-");
+    const lines = [
+      "---",
+      `name: ${sanitizedName}`,
+      `description: ${description}`,
+    ];
+    if (version) lines.push(`version: ${version}`);
+    lines.push("---", "", skill.content, "");
+    return lines.join("\n");
   },
-
-  marker: MINIME_MARKER,
 };
 
 export class WindsurfAdapter extends BaseAdapter {
