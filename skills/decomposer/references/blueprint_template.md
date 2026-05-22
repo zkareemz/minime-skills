@@ -1,11 +1,16 @@
 ---
 schema: planning-blueprint/v1
-title: [Plain-language title — match idea doc title]
-slug: [kebab-case-slug — match idea doc slug]
+template_version: 1.1.0
+artifact_type: planning-blueprint
+title: [Plain-language title - match idea doc title]
+slug: [kebab-case-slug - match idea doc slug]
 date: [YYYY-MM-DD]
 status: draft  # draft | review | locked
 parent_idea: [path or slug of the idea-capture doc this was decomposed from]
 domain: [software | physical | creative | business | hybrid]
+created_by_skill: minime-decomposer
+handoff_to: minime-planner
+handoff_status: [drafting | ready-for-planning | blocked]
 ---
 
 # Planning Blueprint: [Title]
@@ -13,143 +18,195 @@ domain: [software | physical | creative | business | hybrid]
 > **Status:** [draft | review | locked]
 > **Date:** [YYYY-MM-DD]
 > **Parent idea doc:** [link or path]
+> **Next step:** Use this as input to `minime-planner`.
 
-This blueprint is a **planning input**. It records what was extracted, clarified, and locked during decomposition. It does not commit to components, implementation sequence, or test designs — those are for the planning agent.
+This blueprint is a **planning input**. It records what was extracted, clarified, and locked during decomposition. It does not commit to components, implementation sequence, or test designs; those are for the planning agent.
 
 ---
 
-## 1. Problem <!-- verbatim where possible -->
+## 0. Planning Handoff <!-- section: planning-handoff -->
+
+| Field | Value |
+| --- | --- |
+| Canonical outcome | [One sentence: what success looks like] |
+| Ready for planning? | [yes / yes-with-open-questions / no] |
+| Biggest planning risk | [Most important unresolved planning risk, or "none"] |
+| Research required before planning? | [yes / no] |
+| Decisions still needed | [Count or short list] |
+
+**Planner should preserve**
+
+- [Locked choice, user term, constraint, or boundary #1]
+- [Locked choice, user term, constraint, or boundary #2]
+
+**Planner should investigate**
+
+- [Research question or uncertainty #1]
+- [Research question or uncertainty #2]
+
+**Planner should bring options on**
+
+- [Deferred decision #1]
+- [Deferred decision #2]
+
+## 1. Problem <!-- section: problem -->
+
+Preserve the user's own phrasing wherever possible.
 
 > [User's own phrasing of the problem, preserved verbatim from idea doc §3.2 or refined during decomposition. 1-3 sentences.]
 
-## 2. Outcome & Acceptance Criteria
+## 2. Outcome & Acceptance Criteria <!-- section: outcome-acceptance -->
 
 **Outcome:** [One sentence on what success looks like to an outside observer.]
 
-**Acceptance signals** (verbatim where stated by user):
+**Acceptance signals**
 
-- [Signal #1 — observable, measurable where possible]
-- [Signal #2]
-- [...]
+| Signal | Observable evidence | Source | Confidence |
+| --- | --- | --- | --- |
+| [Signal #1] | [How the planner / implementer can verify it] | [Idea doc / decomposition] | [High / medium / low] |
+| [Signal #2] | [...] | [...] | [...] |
 
-## 3. Users & Actors
+## 3. Users & Actors <!-- section: users-actors -->
 
-| Role      | Who (user's term)          | How they are affected   |
-| --------- | -------------------------- | ----------------------- |
-| Primary   | [Who the idea is for]      | [Direct effect]         |
-| Secondary | [Who else is impacted]     | [Indirect effect]       |
-| Decider   | [Whose approval is needed] | [Decision authority]    |
+| Role | Who (user's term) | Job / intent | How they are affected | Confidence |
+| --- | --- | --- | --- | --- |
+| Primary | [Who the idea is for] | [What they need to do or get] | [Direct effect] | [Confirmed / open] |
+| Secondary | [Who else is impacted] | [Their relation to the work] | [Indirect effect] | [Confirmed / open] |
+| Decider | [Whose approval is needed] | [Decision authority] | [Approval / veto / budget] | [Confirmed / open] |
+| Operator / maintainer | [If applicable] | [Ongoing responsibility] | [Operational effect] | [Confirmed / open] |
 
-## 4. Scope
+## 4. Scope <!-- section: scope -->
 
-**In scope**
+| Boundary | Item | Reason | Source |
+| --- | --- | --- | --- |
+| In scope | [Item] | [Why included] | [Idea doc / decomposition] |
+| Out of scope | [Item] | [Why excluded] | [Idea doc / decomposition] |
+| Deferred | [Parked, not killed] | [When to revisit] | [Idea doc / decomposition] |
 
-- [Item — what falls inside the boundary]
-- [...]
+## 5. Existing Context & Integrations <!-- section: existing-context -->
 
-**Out of scope**
+| Category | Details | Planning implication | Source |
+| --- | --- | --- | --- |
+| Replaces / supersedes | [Prior systems, processes, assets, prior work] | [What must migrate, preserve, or avoid] | [Source] |
+| Connects to / depends on | [External systems, services, libraries, materials, audiences, channels] | [Integration or coordination impact] | [Source] |
+| Setting | [Where and when this lives operationally] | [Context the plan must respect] | [Source] |
+| Prior attempts / ruled-out approaches | [What was tried; what was rejected and why] | [What not to repeat] | [Source] |
 
-- [Item — explicitly excluded]
-- [...]
+## 6. Constraints & Non-Functionals <!-- section: constraints-non-functionals -->
 
-**Deferred** (parked, not killed — surfaced again only on user request)
+Only constraints that are load-bearing for planning. Skip rows that do not apply.
 
-- [Item — why parked]
-- [...]
+| Type | Constraint | Hard / soft | Planning implication | Source |
+| --- | --- | --- | --- | --- |
+| Time | [Deadline, duration, pacing] | [Hard / soft / open] | [How this shapes the plan] | [User-stated] |
+| Resources | [Budget, people, materials available] | [Hard / soft / open] | [...] | [User-stated] |
+| Technical / Material | [Required stack, hardware, materials, IP, format] | [Hard / soft / open] | [...] | [User-stated] |
+| Organizational | [Approvals, dependencies, political limits] | [Hard / soft / open] | [...] | [User-stated] |
+| Legal / Ethical / Safety | [Compliance, safety, public exposure] | [Hard / soft / open] | [...] | [User-stated] |
+| Quality / Non-functional | [Performance, durability, accessibility, audience experience, scale] | [Hard / soft / open] | [...] | [User-stated] |
+| Other | [Anything else load-bearing] | [Hard / soft / open] | [...] | [User-stated] |
 
-## 5. Existing Context & Integrations
+## 7. Key Workflows & Scenarios <!-- section: workflows-scenarios -->
 
-- **Replaces / supersedes:** [Prior systems, processes, assets, prior work]
-- **Connects to / depends on:** [External systems, services, libraries, materials, audiences, channels — domain-agnostic]
-- **Setting:** [Where and when this lives operationally — verbatim where possible]
-- **Prior attempts & ruled-out approaches:** [What was tried; what was rejected and why]
+The 2-5 paths that must work for this to count as successful. Each should be concrete enough for the planner to plan against.
 
-## 6. Constraints & Non-Functionals
+### Workflow A - [Short name]
 
-Only constraints that are **load-bearing** for planning. Skip rows that do not apply to this idea's domain.
+| Step | Actor | Action | Expected result | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | [Actor] | [Step] | [Result] | [...] |
+| 2 | [Actor] | [Step] | [Result] | [...] |
 
-| Type                       | Constraint                                                                                       | Source        |
-| -------------------------- | ------------------------------------------------------------------------------------------------ | ------------- |
-| Time                       | [Deadline, duration, pacing]                                                                     | [User-stated] |
-| Resources                  | [Budget, people, materials available]                                                            | [User-stated] |
-| Technical / Material       | [Required stack, hardware, materials, IP, format]                                                | [User-stated] |
-| Organizational             | [Approvals, dependencies, political limits]                                                      | [User-stated] |
-| Legal / Ethical / Safety   | [Compliance, safety, public exposure]                                                            | [User-stated] |
-| Quality / Non-functional   | [Performance, durability, accessibility, audience experience, scale — only if load-bearing]      | [User-stated] |
-| Other                      | [Anything else load-bearing]                                                                     | [User-stated] |
+### Workflow B - [Short name]
 
-## 7. Key Workflows & Scenarios
+| Step | Actor | Action | Expected result | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | [Actor] | [Step] | [Result] | [...] |
+| 2 | [Actor] | [Step] | [Result] | [...] |
 
-The 2-5 paths that must work for this to count as successful. Each as a numbered sequence the planning agent can plan against.
+## 8. Risks, Edge Cases & Failure Modes <!-- section: risks-edge-cases -->
 
-### Workflow A — [Short name]
+| Concern | Type | Likelihood | Impact | Mitigation noted by user | Planner action |
+| --- | --- | --- | --- | --- | --- |
+| [Description] | [Risk / edge case / failure mode] | [L/M/H] | [L/M/H] | [Mitigation or "open"] | [Research / decide / account for in phase] |
 
-1. [Step]
-2. [Step]
-3. [...]
+## 9. Dependencies & Ordering Constraints <!-- section: dependencies-ordering -->
 
-### Workflow B — [Short name]
+The decomposer records the constraint; the planner picks the sequence.
 
-1. [Step]
-2. [...]
+| Item | Type | Status | Blocks / gates | Must happen before | Notes |
+| --- | --- | --- | --- | --- | --- |
+| [Name] | [Person / system / asset / decision / event] | [Have / need / pending / unknown] | [What it gates] | [Dependency or "unknown"] | [Free-form] |
 
-## 8. Risks, Edge Cases & Failure Modes
+## 10. Research Questions for Planning <!-- section: research-questions -->
 
-| Concern                  | Likelihood | Impact | Mitigation noted by user (or "open") |
-| ------------------------ | ---------- | ------ | ------------------------------------ |
-| [Description]            | [L/M/H]    | [L/M/H]| [Mitigation or "open"]               |
+Questions the planner must investigate before committing to a plan. Phrase each as a question.
 
-## 9. Dependencies & Ordering Constraints
+| ID | Question | Why it matters | What an answer unlocks | Suggested source | Priority |
+| --- | --- | --- | --- | --- | --- |
+| R1 | [Question] | [Planning impact] | [Decision / phase / risk it informs] | [Web / docs / codebase / user] | [High / medium / low] |
 
-Things that must be in place, or must happen before other things, for the planning agent to sequence work correctly. **The decomposer records the constraint; the planning agent picks the sequence.**
+## 11. Decisions Locked <!-- section: decisions-locked -->
 
-| Item     | Type                              | Status              | Blocks (what it gates) | Notes       |
-| -------- | --------------------------------- | ------------------- | ---------------------- | ----------- |
-| [Name]   | [Person / system / asset / decision / event] | [Have / need / pending] | [What it gates]    | [Free-form] |
+Choices the planner must not relitigate unless the user explicitly reopens them.
 
-## 10. Research Questions for Planning
+| ID | Decision | Source | Why locked | Implication for planning |
+| --- | --- | --- | --- | --- |
+| L1 | [Decision] | [Idea doc §X / decomposition] | [Reason] | [What this constrains] |
 
-Questions the planning agent must investigate before committing to a plan. Each phrased as a **question**, not a statement.
+## 12. Decisions Deferred <!-- section: decisions-deferred -->
 
-- **[Question]** — what an answer would unblock.
-- [...]
+Choices the planner should bring options on, not pick unilaterally.
 
-## 11. Decisions Locked
+| ID | Choice point | Why deferred | Options requested / shape | Research needed | Priority |
+| --- | --- | --- | --- | --- | --- |
+| D1 | [Choice point] | [Reason] | [What the user wants to compare] | [Yes / no - what] | [High / medium / low] |
 
-Choices the planning agent **must not relitigate**. Includes both decisions carried forward from the idea doc and new decisions reached during decomposition.
+## 13. Carried-forward Open Questions <!-- section: carried-forward-open-questions -->
 
-- [Decision] — _source:_ [idea doc §X | decomposition Phase 2 | decomposition Phase 3]
-- [...]
+Items surfaced during decomposition but explicitly deferred. These are not blockers unless marked as such.
 
-## 12. Decisions Deferred
+| ID | Question / unresolved item | Source | Blocks planning? | Suggested owner | Notes |
+| --- | --- | --- | --- | --- | --- |
+| O1 | [Question or unresolved item] | [Idea doc / conversation] | [Yes / no] | [planner / user / implementation] | [...] |
 
-Choices the planning agent should **bring options on**, not pick unilaterally.
-
-- [Choice point] — _why deferred:_ [reason]. _Shape of options requested:_ [what the user wants to see]
-- [...]
-
-## 13. Carried-forward Open Questions
-
-Items surfaced during decomposition but explicitly deferred — not blockers for planning, but must not be lost.
-
-- [Question or unresolved item] (_source:_ [conversation cluster N | idea doc §Y])
-- [...]
-
-## 14. Glossary <!-- verbatim -->
+## 14. Glossary <!-- section: glossary -->
 
 The user's specific vocabulary, preserved as they used it. Pass through from idea doc §11 plus any new terms introduced during decomposition.
 
-| Term          | Meaning in this idea                                  |
-| ------------- | ----------------------------------------------------- |
-| [User's term] | [What it means in this specific context, not general] |
-| [...]         | [...]                                                 |
+| Term | Meaning in this idea | Must preserve? | Source |
+| --- | --- | --- | --- |
+| [User's term] | [Meaning in this specific context, not general] | [Yes / no] | [Idea doc / decomposition] |
+
+## 15. Completeness Check <!-- section: completeness-check -->
+
+| Dimension | Status | Notes |
+| --- | --- | --- |
+| Problem | [Covered / open / waived] | [...] |
+| Outcome & acceptance | [Covered / open / waived] | [...] |
+| Users & actors | [Covered / open / waived] | [...] |
+| Scope boundaries | [Covered / open / waived] | [...] |
+| Existing context | [Covered / open / waived] | [...] |
+| Constraints & non-functionals | [Covered / open / waived] | [...] |
+| Workflows & scenarios | [Covered / open / waived] | [...] |
+| Risks & failure modes | [Covered / open / waived] | [...] |
+| Dependencies | [Covered / open / waived] | [...] |
+| Research questions | [Covered / open / waived] | [...] |
+| Locked / deferred decisions | [Covered / open / waived] | [...] |
 
 ---
 
-## Appendix — Notes & Verbatim Quotes
+## Appendix A - Notes & Verbatim Quotes <!-- section: appendix-quotes -->
 
 Anything that surfaced during decomposition but did not fit elsewhere. Verbatim quotes preserve nuance the structured fields strip away.
 
 - > "[User quote]"
 - [Note]
-- [...]
+
+## Appendix B - Source Map <!-- section: appendix-source-map -->
+
+Use this to trace important planning inputs back to where they came from.
+
+| Artifact item | Source | Confidence | Notes |
+| --- | --- | --- | --- |
+| [Decision / constraint / workflow / risk] | [Idea doc section / user answer / inference confirmed by user] | [High / medium / low] | [...] |
