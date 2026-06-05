@@ -1,6 +1,6 @@
 {
   "name": "minime-skills",
-  "version": "0.3.2",
+  "version": "0.2.2",
   "description": "A universal AI skills framework for Claude Code, Cursor, Copilot, Gemini, Codex, and more",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
