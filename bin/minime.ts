@@ -18,6 +18,7 @@ import { Command } from "commander";
 import { loadSkills } from "../src/loader";
 import { install } from "../src/install";
 import { uninstall } from "../src/uninstall";
+import { addToGitignore, removeFromGitignore } from "../src/utils/file";
 import { adapters, SUPPORTED_AGENTS } from "../src/adapters";
 import type { Adapter, InstallScope } from "../src/types";
 
@@ -61,25 +62,18 @@ async function pickScope(): Promise<InstallScope | null> {
   return answer as InstallScope;
 }
 
-async function detectAgents(
+async function detectInstalledAgents(
   allAdapters: Adapter[],
   scope: InstallScope,
-  mode: "installed" | "configured",
   dirOverride?: string,
 ): Promise<Adapter[]> {
   const found: Adapter[] = [];
   for (const adapter of allAdapters) {
     const targetDir = getTargetDir(adapter, scope, dirOverride);
     if (!targetDir) continue;
-
-    const detected =
-      mode === "installed"
-        ? await adapter.hasInstalledSkills(targetDir, scope)
-        : scope === "project"
-          ? await adapter.detectInProject(targetDir)
-          : await adapter.detectOnSystem();
-
-    if (detected) found.push(adapter);
+    if (await adapter.hasInstalledSkills(targetDir, scope)) {
+      found.push(adapter);
+    }
   }
   return found;
 }
@@ -113,6 +107,49 @@ function printResults(
   );
 }
 
+const EMBEDDED_FILES = new Set([".github/copilot-instructions.md"]);
+
+function getGitignoreDirs(
+  results: { action: string; path: string }[],
+): string[] {
+  const dirs = new Set<string>();
+  for (const r of results) {
+    if (r.action === "skipped") continue;
+    if (EMBEDDED_FILES.has(r.path)) continue;
+    // Folder type: gitignore the specific skill dir (e.g. .windsurf/skills/minime-idea)
+    // File type: gitignore the specific file (e.g. .cursor/rules/idea.mdc)
+    const entry = r.path.endsWith("/SKILL.md") ? path.dirname(r.path) : r.path;
+    dirs.add(entry);
+  }
+  return [...dirs];
+}
+
+async function addDirsToGitignore(
+  results: { action: string; path: string }[],
+  prompt: boolean,
+): Promise<void> {
+  const entries = getGitignoreDirs(results);
+  if (entries.length === 0) return;
+
+  if (prompt) {
+    const add = await confirm({
+      message: "Add the skills to .gitignore?",
+    });
+    if (isCancel(add) || !add) return;
+  }
+
+  await addToGitignore(process.cwd(), entries);
+  if (prompt) {
+    log.step(
+      `Added ${entries.length} entr${entries.length === 1 ? "y" : "ies"} to .gitignore`,
+    );
+  } else {
+    console.log(
+      `Added ${entries.length} entr${entries.length === 1 ? "y" : "ies"} to .gitignore`,
+    );
+  }
+}
+
 // ── install ───────────────────────────────────────────────────────────────────
 
 program
@@ -125,6 +162,7 @@ program
   .option("-s, --skill <skill>", "Install a specific skill only")
   .option("-g, --global", "Install globally (non-interactive)")
   .option("-d, --dir <dir>", "Target directory")
+  .option("--gitignore", "Add installed directories to .gitignore")
   .action(async (opts) => {
     if (opts.agent) {
       try {
@@ -136,6 +174,9 @@ program
           skillName: opts.skill,
         });
         printResults(results);
+        if (opts.gitignore && scope === "project") {
+          await addDirsToGitignore(results, false);
+        }
       } catch (err) {
         console.error(`Error: ${(err as Error).message}`);
         process.exit(1);
@@ -151,30 +192,12 @@ program
       process.exit(0);
     }
 
-    const s = spinner();
-    s.start("Detecting agents…");
-    const allAdapters = SUPPORTED_AGENTS.map((n) => adapters[n]);
-    let detected = await detectAgents(
-      allAdapters,
-      scope,
-      "configured",
-      opts.dir,
+    const allAdapters = SUPPORTED_AGENTS.map((n) => adapters[n]).filter(
+      (a) => scope === "project" || a.supportsGlobal,
     );
-    s.stop(`Found ${detected.length} agent(s).`);
-
-    if (detected.length === 0) {
-      log.warn(
-        scope === "global"
-          ? "No supported agents detected on this system. Showing all options."
-          : "No agent config found in this project. Showing all options.",
-      );
-      detected = allAdapters.filter(
-        (a) => scope === "project" || a.supportsGlobal,
-      );
-    }
 
     const selected = await pickAgents(
-      detected,
+      allAdapters,
       "Select agents to install for:",
     );
     if (!selected) {
@@ -201,6 +224,10 @@ program
       const created = results.filter((r) => r.action === "created").length;
       const updated = results.filter((r) => r.action === "updated").length;
       outro(`${created} created, ${updated} updated.`);
+
+      if (scope === "project") {
+        await addDirsToGitignore(results, true);
+      }
     } catch (err) {
       sp.stop("Failed.");
       log.error((err as Error).message);
@@ -234,6 +261,17 @@ program
         console.log(
           `\nDone. ${results.filter((r) => r.action === "removed").length} file(s) removed.`,
         );
+        if (scope === "project") {
+          const removed = getGitignoreDirs(
+            results.filter((r) => r.action === "removed"),
+          );
+          if (removed.length > 0) {
+            await removeFromGitignore(process.cwd(), removed);
+            console.log(
+              `Cleaned ${removed.length} entr${removed.length === 1 ? "y" : "ies"} from .gitignore`,
+            );
+          }
+        }
       } catch (err) {
         console.error(`Error: ${(err as Error).message}`);
         process.exit(1);
@@ -252,12 +290,7 @@ program
     const s = spinner();
     s.start("Detecting installed agents…");
     const allAdapters = SUPPORTED_AGENTS.map((n) => adapters[n]);
-    const detected = await detectAgents(
-      allAdapters,
-      scope,
-      "installed",
-      opts.dir,
-    );
+    const detected = await detectInstalledAgents(allAdapters, scope, opts.dir);
     s.stop(`Found ${detected.length} agent(s) with skills installed.`);
 
     if (detected.length === 0) {
@@ -321,6 +354,18 @@ program
       outro(
         `${results.filter((r) => r.action === "removed").length} file(s) removed.`,
       );
+
+      if (scope === "project") {
+        const removed = getGitignoreDirs(
+          results.filter((r) => r.action === "removed"),
+        );
+        if (removed.length > 0) {
+          await removeFromGitignore(process.cwd(), removed);
+          log.step(
+            `Cleaned ${removed.length} entr${removed.length === 1 ? "y" : "ies"} from .gitignore`,
+          );
+        }
+      }
     } catch (err) {
       sp.stop("Failed.");
       log.error((err as Error).message);
